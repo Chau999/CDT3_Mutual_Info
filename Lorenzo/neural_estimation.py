@@ -4,7 +4,6 @@ import torch.nn as nn
 import torch.nn.functional as F
 from sklearn.preprocessing import StandardScaler
 import numpy as np
-from tqdm import tqdm
 
 
 def MINE(x, y, n_epoch=200, representation='DV', hidden_parameters=10, 
@@ -46,7 +45,7 @@ def MINE(x, y, n_epoch=200, representation='DV', hidden_parameters=10,
     
     splits=np.arange(0, len(x)+batch_size, batch_size)  # find the indeces splitting the data in mini-batches
     
-    for epoch in tqdm(range(n_epoch)):
+    for epoch in range(n_epoch):
                 
         y_shuffle=np.random.permutation(y)  # shuffle to be able to estimate independent average
         y_shuffle = Variable(torch.from_numpy(y_shuffle).type(torch.FloatTensor), requires_grad = True)    
@@ -84,7 +83,8 @@ def MINE(x, y, n_epoch=200, representation='DV', hidden_parameters=10,
 def pairwise_neural_estimation_MI(df, n_epoch=200, representation='DV', hidden_parameters=10, 
                                   optimizer='Adam', batch_size=None):
     # each column of df represent a variable, each row an observation.
-
+    # it returns 0 values in the case in which all rows are invalid for the given pair of variables
+    
     num_vars = len(df.columns)
     
     corr_matrix = np.zeros((num_vars, num_vars, 2))
@@ -92,7 +92,8 @@ def pairwise_neural_estimation_MI(df, n_epoch=200, representation='DV', hidden_p
     for i in range(num_vars):
         for j in range(i+1, num_vars):
             pair = df.iloc[:,[i, j]].dropna()
-            corr_matrix[i,j] = MINE(pair.iloc[:,0].values.reshape(-1, 1), 
+            if len(pair) != 0:
+                corr_matrix[i,j] = MINE(pair.iloc[:,0].values.reshape(-1, 1), 
                                     pair.iloc[:,1].values.reshape(-1, 1), n_epoch=n_epoch, 
                                     representation=representation, hidden_parameters=hidden_parameters, 
                                     optimizer=optimizer, batch_size=batch_size)
