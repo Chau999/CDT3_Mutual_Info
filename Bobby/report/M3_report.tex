@@ -1,0 +1,74 @@
+\documentclass[a4paper]{article}
+\usepackage{titling}
+\setlength{\droptitle}{-5em}
+\usepackage[english]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage[numbers]{natbib}
+\usepackage{graphicx}
+\usepackage[colorinlistoftodos]{todonotes}
+\usepackage{url}
+\usepackage[]{algorithm2e}
+\usepackage[margin=1in]{geometry}
+\usepackage{float}
+
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{defn}{Definition}[section]
+
+\title{Mutual Information}
+\author{Alan Chau, Bobby He \& Lorenzo Pacchiardi}
+%\date{} % Activate to display a given date or no date (if empty),
+         % otherwise the current date is printed 
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+Quantifying dependencies between random variables is a key task in Applied Statistics. In this report we will examine the usability of Mutual information estimation and related methods to quantify dependencies.
+\end{abstract}
+
+\section{Introduction}
+When presented with a new data-set one of the first data exploration questions that must be addressed is the question of dependency between the different covariates of the data. A classic approach to this question would be to estimate pairwise Pearson corrleation coefficients, $R^2$, but by its very definition this measure is only able to quantify linear dependencies. For more complex relationships, the information theoretic concept of Mutual Information has received a lot of attention in the literature recently. Our report will first provide a background on Mutual Information and the recently introduced Maximum Information Criterion \citep{Reshef}, before a simulation study on the strengths and weaknesses of Mutual Information related estimates. 
+
+\section{Background}
+\subsection{Mutual Information}
+Let $X$,$Y$ be two random variables with respective supports $\mathcal{X}$, $\mathcal{Y}$, marginal densities $p_X$, $p_Y$ and joint density $p_{X,Y}$ with respect to the Lebesgue measure. Then, the Mutual Information between $X$ and $Y$ is defined to be:
+\begin{align}
+I(X,Y)&=\text{KL}(P_{X,Y}||P_X \otimes P_Y)\\
+&= \int_{\mathcal{X}}\int_{\mathcal{Y}}p_{X,Y}(x,y)\text{log}\big(\frac{p_{X,Y}(x,y)}{p_X(x)p_Y(y)}\big)dxdy
+\end{align}
+where $\text{KL}$ is the Kullback-Leibler divergence. 
+
+From this definition, it is easy to see that Mutual Information has an alternative characterisation in terms of (differential) Shannon Entropy, $H$, under regularity conditions:
+
+$$I(X,Y)=H(X)+H(Y)-H(X,Y)$$
+
+These characterisations give us several appealing properties of Mutual Information as a measure of dependence:
+\begin{itemize}
+\item $I(X,Y)=0$ if and only if $X$ \& $Y$ are independent random variables.
+\item $I(X,Y)=I(f(X),g(Y))$ for any smooth bijective functions $f$ and $g$ that have non-singular Jacobians.
+\item $I(X,Y)$ can be interpreted as the reduction in uncertainty in $X$ if $Y$ is known. If we choose logarithmic base $2$ then $I(X,Y)$ is measured in units of bits.
+\end{itemize}
+
+A further characterisation of $I(X,Y)$ that will be useful to know utilises the Donsker-Varadhan representation of the $\text{KL}$ divergence:
+$$I(X,Y)=\underset{f}{\text{sup}}\ \mathbb{E}_{\mathbb{P}_{X,Y}}\big[f\big]-\text{log}\big(\mathbb{E}_{\mathbb{P}_{X}\otimes\mathbb{P}_Y}\big[e^{f}\big]\big)$$
+where the supremum is taken over all functions $f: \mathcal{X}\times\mathcal{Y}\rightarrow\mathbb{R}$ for which the expectations are finite.
+
+\section{Dependency measure estimates}
+Unfortunately, in almost all situations one can only estimate a desired dependency measure using observed data $\{(X_i,Y_i)\}_{i=1}^{n}$. This section describes some methods that have been suggested in the literature for this problem.
+\subsection{Maximum Information Criterion}
+The Maximum Information Criterion (MIC) introduced in \citep{Reshef} is designed to improve on the interpretability of dependency measures between one-dimensional random variables. The method works on the idea that a grid drawn on the scatterplot of the data should partition the observed points in such a way that describes any potential dependency. For various grid sizes $(x,y)$, the authors suggest selecting grids in order to maximise the Mutual Information, $I_{x,y}$ of the distribution on the grid blocks such that each block has mass proportional to the number of observed points lying within it. The authors normalise the Mutual Information scores using the fact that $I_{x,y}\leq \text{min}(log(x),log(y))$, which can be easily deduced from Shannon Entropy characterisation of Mutual Information. The $\text{MIC}$ is then calculated to be the maximum over all normalised $I_{x,y}$ values for a range of $(x,y)$ values satisfying $xy\leq B(n)$, for a value $B(n)$ to be chosen. NOT FINISHED.
+
+\subsection{Mutual Information Estimation}
+The most popular method for Mutual Information estimation originated in \citep{Kraskov} and uses the well-known Kozachenko-Leonenko estimate for Shannon entropy, $H$, which relies on k-nearest neighbour methods. Recent work \citep{Berrett} has proven that, under regularity conditions and in dimensions $d\leq3$, the Kozachenko-Leonenko in fact enjoys a Central Limit type result targeting $H$. For higher dimensions, a non-trivial bias term typically precludes its efficiency.
+
+\subsection{Mutual Information Neural Estimation}
+The search for a Mutual Information estimator that transcends the curse of dimensionality brings us to the area of deep learning. The estimator introduced in \citep{Belghazi}, which we shall refer to as MINE, uses the Donsker-Varadhan characterisation of $I(X<Y)$. More specifically, MINE uses the universal approximation theorem of neural networks to define:
+
+$$\hat{I(X,Y)}_n=\underset{\theta\in \Theta}{\text{sup}}\ \mathbb{E}_{\mathbb{P}_{X,Y}}\big[f_\theta\big]-\text{log}\big(\mathbb{E}_{\mathbb{P}_{X}\otimes\mathbb{P}_Y}\big[e^{f_\theta}\big]\big) $$
+
+\bibliographystyle{plainnat}
+\bibliography{mutual_info}
+
+\end{document}
