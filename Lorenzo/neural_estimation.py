@@ -76,7 +76,7 @@ def MINE(x, y, n_epoch=200, representation='DV', hidden_parameters=10,
         
     # to compute the average estimation I discard the first 25% of steps (arbitrary choice)
     if (return_loss_plot):
-        return -np.mean(plot_loss[np.int(n_epoch/4):]), np.var(plot_loss[np.int(n_epoch/4):]), plot_loss
+        return -np.mean(plot_loss[np.int(n_epoch/4):]), np.var(plot_loss[np.int(n_epoch/4):]), -np.array(plot_loss)
     else: 
         return -np.mean(plot_loss[np.int(n_epoch/4):]), np.var(plot_loss[np.int(n_epoch/4):])
     
